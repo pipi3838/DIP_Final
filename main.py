@@ -24,9 +24,10 @@ def main():
 	# sample grid from RGB colors and the get rbf weights
 	sample_level = 16
 	sample_colors = sample_RGB_color(sample_level)
+	# used only when new image is loaded
 	sample_weight_map = rbf_weights(means, sample_colors) 
 
-	# img color transfer given any modified_p
+	# img color transfer given any modified_p 
 	modified_p = [random.sample(range(255),3) for _ in range(5)] 
 	result = img_color_transfer(lab, means, modified_p, sample_weight_map, sample_colors, sample_level)
 
