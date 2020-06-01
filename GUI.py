@@ -1,11 +1,11 @@
-from PIL import Image
+from PIL import Image, ImageEnhance
 from PIL.ImageQt import ImageQt, toqpixmap
 from palette import *
 from util import *
 from test import *
 from transfer import *
 import numpy as np
-import cv2
+#import cv2
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
@@ -47,7 +47,7 @@ class Window(QWidget):
             return
         self.current_palette = N
         print('current palette:', self.current_palette)
-        #choose new color
+        # choose new color
         curr_clr = self.palette_color[N]
         current = QColor(curr_clr[0],curr_clr[1],curr_clr[2])
         color = QColorDialog.getColor(initial=current, 
@@ -55,9 +55,12 @@ class Window(QWidget):
         print(color_np(color))
         self.palette_color[N] = color_np(color)
         self.set_palette_color()
-        #modify image
+        # modify image
         self.pilImage = self.pilImage
-        #show image
+        # for testing
+        enhancer = ImageEnhance.Brightness(self.pilImage)
+        self.pilImage = enhancer.enhance(1.1)
+        # show image
         self.image_label.setPixmap(toqpixmap(self.pilImage))
 
     def set_palette_color(self):
