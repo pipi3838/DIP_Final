@@ -2,3 +2,5 @@
 *.jpg
 *.pyc
 *.pdf
+test.py
+._*.py

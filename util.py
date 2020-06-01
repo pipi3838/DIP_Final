@@ -51,3 +51,6 @@ def XYZtoRGB(XYZ):
 
 def LABtoRGB(LAB):
 	return XYZtoRGB(LABtoXYZ(LAB))
+
+def ByteLAB(LAB):
+    return (int(LAB[0] / 100 * 255), int(LAB[1] + 128), int(LAB[2] + 128))
