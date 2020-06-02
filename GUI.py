@@ -102,6 +102,8 @@ class Window(QWidget):
         self.image_label.setPixmap(self.pixmap_open_img())
         # rbf weights
         self.sample_weight_map = rbf_weights(self.means, self.sample_colors)
+    def reset(self):
+        self.image_label.setPixmap(self.pixmap_open_img())
     def save_file(self):
         options = QFileDialog.Options()
         file_name, _ = QFileDialog.getSaveFileName(
@@ -161,6 +163,7 @@ class Window(QWidget):
         reset_image = QPushButton('Reset')
         save_image = QPushButton('Save')
         open_image.clicked.connect(self.open_file)
+        reset_image.clicked.connect(self.reset)
         save_image.clicked.connect(self.save_file)
         image_button_layout.addWidget(open_image)
         image_button_layout.addWidget(reset_image)
