@@ -21,11 +21,11 @@ def main():
 		bins[pixel] = count
 	bins = sample_bins(bins)
 
-	k_palettes = 5
+	k_palettes = 7
 	means = k_means(bins, k=k_palettes, init_mean=True)
 
 	# sample grid from RGB colors and the get rbf weights
-	sample_level = 16
+	sample_level = 32
 	sample_colors = sample_RGB_color(sample_level)
 	# used only when new image is loaded
 	sample_weight_map = rbf_weights(means, sample_colors) 
@@ -36,7 +36,7 @@ def main():
 	result.save('result.jpg')
 	t2 = time.time()
 
-	print('First Total time: {}'.format(str(t2 - t1)))
+	print('Total time: {}'.format(str(t2 - t1)))
 
 if __name__ == '__main__':
 	main()

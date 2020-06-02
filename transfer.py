@@ -147,7 +147,7 @@ def multi_palette_color_transfer(pixel_color, ori_palette, modified_palette, wei
 
 def sample_RGB_color(sample_rate=16):
 
-	levels = [i * 255/(sample_rate-1) for i in range(sample_rate)]
+	levels = [round(i * 255/(sample_rate-1), 5) for i in range(sample_rate)]
 	colors = []
 	for r, g, b in itertools.product(levels, repeat=3):
 		colors.append((r,g,b))
@@ -171,11 +171,14 @@ def find_nearest_corners(target, step, step_range):
 
 
 def trilinear_interpolation(target, corners, sample_colors_map):
-	
+
 	xyz_dist = []
 	for i in range(3):
 		dist = (target[i] - corners[i][0]) / (corners[i][1] - corners[i][0]) if corners[i][1] != corners[i][0] else 0
 		xyz_dist.append((1-dist, dist))
+
+	# for c in itertools.product(*corners):
+		# if c not in sample_colors_map: print(c)
 
 	eight_corners_val = [np.array(sample_colors_map[c]) for c in itertools.product(*corners)]
 	x_interp, y_interp, res = [], [], 0
@@ -209,7 +212,7 @@ def img_color_transfer(img, original_p, modified_p, sample_weight_map, sample_co
 
 	# image pixel color transfer by sample color trilinear interpolation
 	step = 255 / (sample_rate - 1)
-	step_range = [i * (255/(sample_rate-1)) for i in range(sample_rate)]
+	step_range = [round(i * (255/(sample_rate-1)), 5) for i in range(sample_rate)]
 
 	color_map = {}
 	colors = img.getcolors(img.width * img.height)
@@ -217,6 +220,7 @@ def img_color_transfer(img, original_p, modified_p, sample_weight_map, sample_co
 	args = []
 	for _,c in colors:
 		nearest_corners = find_nearest_corners(c, step, step_range)
+		# print(nearest_corners)
 		args.append((c, nearest_corners, sample_colors_map))
 	with Pool(cpu_count() - 1) as pool:
 		interp_res = pool.starmap(trilinear_interpolation, args)

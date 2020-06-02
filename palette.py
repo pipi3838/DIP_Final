@@ -42,7 +42,7 @@ def init_means(bins, k=5):
 
 def k_means(bins, k=5, init_mean=True, max_iter=1000, black=True):
 	if init_mean is False: means = random.sample(list(bins),k)
-	else: means = init_means(bins)
+	else: means = init_means(bins, k)
 	if black: means.append([0, 128, 128])
 	means = np.array(means)
 	mean_cnt = means.shape[0]
@@ -51,7 +51,7 @@ def k_means(bins, k=5, init_mean=True, max_iter=1000, black=True):
 		cluster_sum = [np.array([0,0,0],dtype=float) for _ in range(mean_cnt)]
 		cluster_cnt = [0 for _ in range(mean_cnt)]
 		for color, cnt in bins.items():
-			color = np.array(color)
+			color = np.array(color)	
 			dists = [distance(color,mean) for mean in means]
 			cluster_th = dists.index(min(dists))
 			cluster_sum[cluster_th] += color * cnt
