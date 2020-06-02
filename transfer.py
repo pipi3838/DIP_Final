@@ -146,6 +146,7 @@ def multi_palette_color_transfer(pixel_color, ori_palette, modified_palette, wei
 	return res
 
 def sample_RGB_color(sample_rate=16):
+
 	levels = [i * 255/(sample_rate-1) for i in range(sample_rate)]
 	colors = []
 	for r, g, b in itertools.product(levels, repeat=3):
@@ -170,6 +171,7 @@ def find_nearest_corners(target, step, step_range):
 
 
 def trilinear_interpolation(target, corners, sample_colors_map):
+	
 	xyz_dist = []
 	for i in range(3):
 		dist = (target[i] - corners[i][0]) / (corners[i][1] - corners[i][0]) if corners[i][1] != corners[i][0] else 0
@@ -188,6 +190,7 @@ def trilinear_interpolation(target, corners, sample_colors_map):
 	return res
 
 def img_color_transfer(img, original_p, modified_p, sample_weight_map, sample_colors, sample_rate):
+
 	sample_colors_map = {}
 	original_p = np.array([RegularLAB(c) for c in original_p])
 	modified_p = np.array([RegularLAB(c) for c in modified_p])
