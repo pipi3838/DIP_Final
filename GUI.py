@@ -140,7 +140,7 @@ class Window(QWidget):
         print('Saved to',file_name)
     def set_number_of_palettes(self, text):
         self.K = int(text)
-        self.set_palette_color()
+        #self.set_palette_color()
         for i in range(self.K, 7):
             attr = 'background-color:#EFEFEF;border:0px'
             self.palette_button[i].setStyleSheet(attr)
