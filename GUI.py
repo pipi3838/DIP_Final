@@ -5,10 +5,10 @@ from util import *
 #from test import *
 from transfer import *
 import numpy as np
-import cv2
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
+import cv2
 
 html_color = lambda color : '%02x%02x%02x' % (color[0],color[1],color[2])
 color_np = lambda color : np.array([color.red(),color.green(),color.blue()])
