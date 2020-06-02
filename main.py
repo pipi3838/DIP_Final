@@ -3,13 +3,14 @@ from palette import *
 from util import *
 import random
 from transfer import *
-
+import time
 def main():
 	# load image
 	img_name = 'lena.png'
 	img = Image.open(img_name)
 	print(img_name, img.format, img.size, img.mode)
 	
+	t1 = time.time()
 	# transfer to lab
 	lab = rgb2lab(img)
 
@@ -29,9 +30,11 @@ def main():
 
 	# img color transfer given any modified_p 
 	modified_p = [random.sample(range(255),3) for _ in range(5)] 
-	result = img_color_transfer(lab, means, modified_p, sample_weight_map, sample_colors, sample_level)
-
+	result = img_color_transfer(lab, means, means, sample_weight_map, sample_colors, sample_level)
 	result.save('result.jpg')
+	t2 = time.time()
+
+	print('First Total time: {}'.format(str(t2 - t1)))
 
 if __name__ == '__main__':
 	main()

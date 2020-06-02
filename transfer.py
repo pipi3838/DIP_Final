@@ -73,6 +73,8 @@ def single_palette_color_transfer(pixel_color, ori_color, modified_color):
 	else:
 		x_boundary = get_boundary(modified_color,pixel_color - ori_color,0,1)
 
+	if distance(c_boundary, ori_color) == 0: return ori_color
+	
 	ratio = min(1, (distance(x_boundary,pixel_color) / distance(c_boundary, ori_color)))
 	res = pixel_color + (x_boundary - pixel_color) / distance(x_boundary, pixel_color) * distance(modified_color,ori_color) * ratio
 	return res
