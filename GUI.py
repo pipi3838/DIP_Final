@@ -71,6 +71,7 @@ class Window(QWidget):
         # modify image
         palette_color_lab = cv2.cvtColor(
             self.palette_color[None,:,:],cv2.COLOR_RGB2Lab)[0]
+        print(palette_color_lab)
         self.img = img_color_transfer(
             self.img, self.means, palette_color_lab, self.sample_weight_map, self.sample_colors, self.sample_level)
         #self.img.save('tmp.png')
