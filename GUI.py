@@ -8,7 +8,7 @@ import numpy as np
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
-import cv2
+#import cv2
 
 html_color = lambda color : '#%02x%02x%02x' % (color[0],color[1],color[2])
 color_np = lambda color : np.array([color.red(),color.green(),color.blue()])
@@ -18,7 +18,7 @@ class Window(QWidget):
     palette_button = []
     Source = ''
     image_label = ''
-    cv2Image = []
+    #cv2Image = []
     img = []
     img_lab = []
     palette_color = (np.zeros((7,3)) + 239).astype(int) #initial grey
@@ -26,33 +26,52 @@ class Window(QWidget):
     sample_colors = sample_RGB_color(sample_level)
     sample_weight_map = []
     means = []
+    ###### means <-- lab ; palette_color <-- rgb ######
     def __init__(self):
         super().__init__()
         self.setWindowTitle('Pallete Based Photo Recoloring')
         self.UiComponents()
         self.show()
 
-    def pixmap_open_img(self):
+    def palette2mean(self):# rgb to lab
+        mean = np.zeros(self.palette_color.shape)
+        for i in range(0, self.palette_color.shape[0]):
+            rgb = Image.new('RGB',(1,1),html_color(self.palette_color[i]))
+            mean[i] = np.array(rgb2lab(rgb).getpixel((0,0)))
+        return mean.astype(int)
+    def mean2palette(self):# lab to rgb
+        palette = np.zeros(self.means.shape)
+        for i in range(0, self.means.shape[0]):
+            lab = Image.new('LAB',(1,1),html_color(self.means[i].astype(int)))
+            palette[i] = np.array(lab2rgb(lab).getpixel((0,0)))
+        return palette.astype(int)
+
+    def calc_palettes(self, k):
+        self.K = k
+        colors = self.img_lab.getcolors(self.img_lab.width * self.img_lab.height)
+        bins = {}
+        for count, pixel in colors:
+            bins[pixel] = count
+        bins = sample_bins(bins)
+        self.means = k_means(bins, k=self.K, init_mean=True)
+        print(self.means)
+        #####means_rgb = cv2.cvtColor(
+        #####    self.means.astype(np.ubyte)[None,:,:],cv2.COLOR_Lab2RGB)
+        #####print(means_rgb[0])
+        ######self.palette_color[:k] = means_rgb[0]
+        #####self.palette_color = means_rgb[0]
+        self.palette_color = self.mean2palette()
+        self.set_palette_color()
+    def pixmap_open_img(self, k):
         # load image
         self.img = Image.open(self.Source)
         print(self.Source, self.img.format, self.img.size, self.img.mode)
         # transfer to lab
         self.img_lab = rgb2lab(self.img)
         # get palettes
-        self.K = 5
-        colors = self.img_lab.getcolors(self.img_lab.width * self.img_lab.height)
-        bins = {}
-        for count, pixel in colors:
-            bins[pixel] = count
-        bins = sample_bins(bins)
-        self.means = k_means(bins, k=5, init_mean=True)
-        print(self.means)
-        means_rgb = cv2.cvtColor(
-            self.means.astype(np.ubyte)[None,:,:],cv2.COLOR_Lab2RGB)
-        print(means_rgb[0])
-        self.palette_color = means_rgb[0]
-        self.set_palette_color()
+        self.calc_palettes(k)
         pixmap = toqpixmap(self.img)
+        #self.set_number_of_palettes('5') # default 5 palettes
         return pixmap
     def clicked(self, N):
         if N >= self.K:
@@ -65,17 +84,21 @@ class Window(QWidget):
         color = QColorDialog.getColor(initial=current, 
             options=QColorDialog.DontUseNativeDialog)
         print(color_np(color))
-        new_palette = Image.new('RGB',(1,1),html_color(color_np(color)))
-        palette_lab = np.array(rgb2lab(new_palette).getpixel((0,0)))
-        print(palette_lab)
+        #new_palette = Image.new('RGB',(1,1),html_color(color_np(color)))
+        #palette_lab = np.array(rgb2lab(new_palette).getpixel((0,0)))
+        #print(palette_lab)
+        ###### test #####
+        print(self.palette2mean())
+        ###### test #####
         self.palette_color[N] = color_np(color)
         self.set_palette_color()
         # modify image
-        palette_color_lab = cv2.cvtColor(
-            self.palette_color[None,:,:],cv2.COLOR_RGB2Lab)[0]
-        print(palette_color_lab)
+        ####palette_color_lab = cv2.cvtColor(
+        ####    self.palette_color[None,:,:],cv2.COLOR_RGB2Lab)[0]
+        ####print(palette_color_lab)
         self.img = img_color_transfer(
-            self.img_lab, self.means, palette_color_lab, self.sample_weight_map, self.sample_colors, self.sample_level)
+            self.img_lab, self.means, self.palette2mean(), \
+            self.sample_weight_map, self.sample_colors, self.sample_level)
         print('Done')
         ## for testing
         #enhancer = ImageEnhance.Brightness(self.img)
@@ -99,11 +122,11 @@ class Window(QWidget):
             self,"QFileDialog.getOpenFileName()", "", \
             "Images (*.jpg *.JPG *jpeg *.png *.webp *.tiff *.tif *.bmp *.dib);;All Files (*)", options=options)
         self.Source = file_name
-        self.image_label.setPixmap(self.pixmap_open_img())
+        self.image_label.setPixmap(self.pixmap_open_img(5))
         # rbf weights
         self.sample_weight_map = rbf_weights(self.means, self.sample_colors)
     def reset(self):
-        self.image_label.setPixmap(self.pixmap_open_img())
+        self.image_label.setPixmap(self.pixmap_open_img(self.K))
     def save_file(self):
         options = QFileDialog.Options()
         file_name, _ = QFileDialog.getSaveFileName(
@@ -121,6 +144,7 @@ class Window(QWidget):
         for i in range(self.K, 7):
             attr = 'background-color:#EFEFEF;border:0px'
             self.palette_button[i].setStyleSheet(attr)
+        self.calc_palettes(self.K)
     def UiComponents(self):
         self.main_layout = QVBoxLayout()
 
