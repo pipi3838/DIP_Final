@@ -68,31 +68,35 @@ def single_palette_color_transfer(pixel_color, ori_color, modified_color):
 
 	c_boundary = get_boundary(ori_color, offset, 1,255)
 	lab = pixel_color + offset
+
 	if ValidLAB(lab) and ValidRGB(LABtoRGB(lab)):
 		x_boundary = get_boundary(pixel_color, offset, 1, 255)
 	else:
 		x_boundary = get_boundary(modified_color,pixel_color - ori_color,0,1)
 
-	if distance(c_boundary, ori_color) == 0: return ori_color
+	if distance(x_boundary, pixel_color) == 0: return pixel_color
 	
-	ratio = min(1, (distance(x_boundary,pixel_color) / distance(c_boundary, ori_color)))
-	res = pixel_color + (x_boundary - pixel_color) / distance(x_boundary, pixel_color) * distance(modified_color,ori_color) * ratio
+	if distance(c_boundary, ori_color) == 0: ratio = 1
+	else:
+		ratio = min(1, (distance(x_boundary, pixel_color) / distance(c_boundary, ori_color)))
+	
+	res = pixel_color + ((x_boundary - pixel_color) / distance(x_boundary, pixel_color) * distance(modified_color, ori_color) * ratio)
 	return res
 
 def get_weights(pixel_color, ori_palette):
 	
-	def gaussian(a,b):
-		r = distance(a,b)
-		return math.exp(-(r**2) / (2 * (mean_dist**2)))
-
 	dist = []
 	for p1, p2 in itertools.combinations(ori_palette, 2):
 		dist.append(distance(p1,p2))
 	mean_dist = sum(dist) / len(dist)
+
+	def gaussian(a,b):
+		r = distance(a,b)
+		return math.exp(-(r**2) / (2 * (mean_dist**2)))
 	
 	palette_cnt = len(ori_palette)
 
-	p_matrix = np.zeros((palette_cnt,palette_cnt))
+	p_matrix = np.zeros((palette_cnt,palette_cnt), dtype='float64')
 	for i in range(palette_cnt):
 		for j in range(palette_cnt):
 			p_matrix[i,j] = gaussian(ori_palette[j], ori_palette[i])
@@ -116,7 +120,7 @@ def get_weights(pixel_color, ori_palette):
 def rbf_weights(ori_palette, sample_colors):
 
 	sample_weight_map = {}
-	ori_palette = np.array([RegularLAB(c) for c in ori_palette])
+	ori_palette = np.array([RegularLAB(c) for c in ori_palette], dtype='float64')
 
 	args = []
 	for color in sample_colors:
@@ -195,8 +199,8 @@ def trilinear_interpolation(target, corners, sample_colors_map):
 def img_color_transfer(img, original_p, modified_p, sample_weight_map, sample_colors, sample_rate):
 
 	sample_colors_map = {}
-	original_p = np.array([RegularLAB(c) for c in original_p])
-	modified_p = np.array([RegularLAB(c) for c in modified_p])
+	original_p = np.array([RegularLAB(c) for c in original_p], dtype='float64')
+	modified_p = np.array([RegularLAB(c) for c in modified_p], dtype='float64')
 
 	args = []
 	for color in sample_colors:
@@ -220,7 +224,6 @@ def img_color_transfer(img, original_p, modified_p, sample_weight_map, sample_co
 	args = []
 	for _,c in colors:
 		nearest_corners = find_nearest_corners(c, step, step_range)
-		# print(nearest_corners)
 		args.append((c, nearest_corners, sample_colors_map))
 	with Pool(cpu_count() - 1) as pool:
 		interp_res = pool.starmap(trilinear_interpolation, args)
@@ -235,3 +238,42 @@ def img_color_transfer(img, original_p, modified_p, sample_weight_map, sample_co
 			result_pixels[i,j] = color_map[img_pixels[i,j]]
 
 	return lab2rgb(result)
+
+# def single_transfer(pixel_color, original_p, modified_p):
+# 	pixel_color = RegularLAB(pixel_color)
+# 	weights = get_weights(pixel_color, original_p)
+# 	l = luminance_transfer(pixel_color, original_p, modified_p, weights)
+# 	res = multi_palette_color_transfer(pixel_color, original_p, modified_p, weights)
+# 	return ByteLAB((l, *res[-2:]))
+
+# def test_my_transfer(img, original_p, modified_p):
+# 	img_pixels = img.load()
+# 	original_p = np.array([RegularLAB(c) for c in original_p])
+# 	modified_p = np.array([RegularLAB(c) for c in modified_p])
+	
+# 	result = Image.new('LAB', img.size)
+# 	result_pixels = result.load()
+
+# 	args = []
+
+# 	colors = img.getcolors(img.width * img.height)
+# 	colors_map = {}
+
+# 	for _,c in colors: 
+# 		args.append((c, original_p, modified_p))
+
+# 	with Pool(cpu_count() - 1) as pool:
+# 		color = pool.starmap(single_transfer, args)
+
+# 	for idx,c in enumerate(colors):
+# 		colors_map[c[1]] = color[idx]
+
+# 	for i in range(img.width):
+# 		for j in range(img.height):
+# 			res = colors_map[img_pixels[i,j]]
+# 			result_pixels[i,j] = tuple([int(x) for x in res])
+
+# 	result = lab2rgb(result)
+# 	result.save('single_result.jpg')
+# 	lab2rgb(img).save('single_oringial.jpg')
+# 	return result
