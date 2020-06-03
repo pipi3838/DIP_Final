@@ -25,7 +25,7 @@ def main():
 	bins = sample_bins(bins)
 
 	k_palettes = 7
-	means = k_means(bins, k=k_palettes, init_mean=True)
+	means, _ = k_means(bins, k=k_palettes, init_mean=True)
 	print('Finish building Palettes')
 
 	modified_p = [random.sample(range(255),3) for _ in range(k_palettes)]

@@ -53,7 +53,7 @@ class Window(QWidget):
         for count, pixel in colors:
             bins[pixel] = count
         bins = sample_bins(bins)
-        self.means = k_means(bins, k=self.K, init_mean=True)
+        self.means, _ = k_means(bins, k=self.K, init_mean=True)
         print(self.means)
         #####means_rgb = cv2.cvtColor(
         #####    self.means.astype(np.ubyte)[None,:,:],cv2.COLOR_Lab2RGB)

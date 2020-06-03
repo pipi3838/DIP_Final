@@ -48,9 +48,9 @@ def k_means(bins, k=5, init_mean=True, max_iter=1000, black=True):
 	means = np.array(means)
 	mean_cnt = means.shape[0]
 
+	cluster_cnt = [0 for i in range(mean_cnt)]
 	for _ in range(max_iter):
 		cluster_sum = [np.array([0,0,0],dtype=float) for i in range(mean_cnt)]
-		cluster_cnt = [0 for i in range(mean_cnt)]
 		for color, cnt in bins.items():
 			color = np.array(color)	
 			dists = [distance(color,mean) for mean in means]
@@ -64,7 +64,7 @@ def k_means(bins, k=5, init_mean=True, max_iter=1000, black=True):
 		if (new_means == means).all(): break
 		else: means = new_means
 
-	return np.sort(means[:k],axis=0)
+	return np.sort(means[:k],axis=0), cluster_cnt
 
 
 
