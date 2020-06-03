@@ -33,8 +33,9 @@ def init_means(bins, k=5):
 	# for color, cnt in bins.items():
 	for _ in range(k):
 		for color,cnt in bins.items():
-			if color not in res: res.append(color)
-			break
+			if color not in res: 
+				res.append(color)
+				break
 		bins = {k: v * attenuation(k,res[-1]) for k, v in bins.items()}
 		bins = {k: v for k, v in sorted(bins.items(), key=lambda item: item[1], reverse=True)}
 
@@ -48,8 +49,8 @@ def k_means(bins, k=5, init_mean=True, max_iter=1000, black=True):
 	mean_cnt = means.shape[0]
 
 	for _ in range(max_iter):
-		cluster_sum = [np.array([0,0,0],dtype=float) for _ in range(mean_cnt)]
-		cluster_cnt = [0 for _ in range(mean_cnt)]
+		cluster_sum = [np.array([0,0,0],dtype=float) for i in range(mean_cnt)]
+		cluster_cnt = [0 for i in range(mean_cnt)]
 		for color, cnt in bins.items():
 			color = np.array(color)	
 			dists = [distance(color,mean) for mean in means]
