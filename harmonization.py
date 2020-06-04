@@ -153,7 +153,7 @@ def auto_palette(palette_rgb, weight): # K x 3 numpy array
     m = 0
     print(m)
     M, Alpha = int(Result[m][1]), Result[m][2]
-    sigma_w_ratio = 0.25
+    sigma_w_ratio = 0.5
     palette_hsv = harm_shift(palette_hsv, M, Alpha, sigma_w_ratio)
     palette_rgb = cv2.cvtColor(palette_hsv,cv2.COLOR_HSV2RGB)##back to RGB
     return palette_rgb[0]
