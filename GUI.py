@@ -8,6 +8,7 @@ import numpy as np
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
+from harmonization import auto_palette
 #import cv2
 
 html_color = lambda color : '#%02x%02x%02x' % (color[0],color[1],color[2])
@@ -26,6 +27,7 @@ class Window(QWidget):
     sample_colors = sample_RGB_color(sample_level)
     sample_weight_map = []
     means = []
+    means_weight = []
     ###### means <-- lab ; palette_color <-- rgb ######
     def __init__(self):
         super().__init__()
@@ -53,7 +55,8 @@ class Window(QWidget):
         for count, pixel in colors:
             bins[pixel] = count
         bins = sample_bins(bins)
-        self.means, _ = k_means(bins, k=self.K, init_mean=True)
+        self.means, self.means_weight = \
+            k_means(bins, k=self.K, init_mean=True)
         print(self.means)
         #####means_rgb = cv2.cvtColor(
         #####    self.means.astype(np.ubyte)[None,:,:],cv2.COLOR_Lab2RGB)
@@ -62,6 +65,7 @@ class Window(QWidget):
         #####self.palette_color = means_rgb[0]
         self.palette_color = self.mean2palette()
         self.set_palette_color()
+        print('auto:', auto_palette(self.palette_color, self.means_weight))
     def pixmap_open_img(self, k):
         # load image
         self.img = Image.open(self.Source)
@@ -105,7 +109,8 @@ class Window(QWidget):
         #self.img = enhancer.enhance(1.1)
         # show image
         #self.image_label.setPixmap(pixmap)
-        self.image_label.setPixmap(toqpixmap(self.img))
+        resized = toqpixmap(self.img).scaledToHeight(512)
+        self.image_label.setPixmap(resized)
     def init_palette_color(self):
         for i in range(7):
             attr = 'background-color:'+html_color(
@@ -122,11 +127,15 @@ class Window(QWidget):
             self,"QFileDialog.getOpenFileName()", "", \
             "Images (*.jpg *.JPG *jpeg *.png *.webp *.tiff *.tif *.bmp *.dib);;All Files (*)", options=options)
         self.Source = file_name
-        self.image_label.setPixmap(self.pixmap_open_img(5))
+        resized = self.pixmap_open_img(5).scaledToHeight(512)
+        self.image_label.setPixmap(resized)
+        #self.image_label.setPixmap(self.pixmap_open_img(5))
         # rbf weights
         self.sample_weight_map = rbf_weights(self.means, self.sample_colors)
     def reset(self):
-        self.image_label.setPixmap(self.pixmap_open_img(self.K))
+        resized = self.pixmap_open_img(self.K).scaledToHeight(512)
+        self.image_label.setPixmap(resized)
+        #self.image_label.setPixmap(self.pixmap_open_img(self.K))
     def save_file(self):
         options = QFileDialog.Options()
         file_name, _ = QFileDialog.getSaveFileName(
