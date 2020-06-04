@@ -2,9 +2,9 @@ import math
 import numpy as np
 import cv2 
 
-type_m = ['i type', 'V type', 'L type', 'I type', 'T type', 'Y type', 'X type', 'mirror-L type'] 
-type_name = ['i-type', 'V-type', 'L-type', 'I-type', 'T-type', 'Y-type', 'X-type', 'mirror-L'] 
-Tm = np.array([[0,9,0,9],[0,46.8,0,46.8],[0,39.6,90,9],[0,9,180,9],[0,90,0,90],[0,9,180,46.8],[0,46.8,180,46.8],[90,39.6,0,9]])
+type_m = ['i type', 'L type', 'mirror-L type', 'V type', 'I type', 'Y type', 'X type', 'T type'] 
+type_name = ['i-type', 'L-type', 'mirror-L', 'V-type', 'I-type', 'Y-type', 'X-type', 'T-type'] 
+Tm = np.array([[0,9,0,9],[0,39.6,90,9],[90,39.6,0,9],[0,46.8,0,46.8],[0,9,180,9],[0,9,180,46.8],[0,46.8,180,46.8],[0,90,0,90]])
 phi = 0.38197
 
 def shift_hue(img, deg):
@@ -119,6 +119,7 @@ def harm_shift(H_img, m, alpha, s_w):
         for j in range(0,H_img.shape[1]):
             #print(H_img[i][j])
             #if arc_dist_180(H_img[i][j][0], C1) < arc_dist_180(H_img[i][j][0], C2) :
+            #print(m, H_img[i][j][0], C1, C2)
             if direction(m, H_img[i][j][0], C1, C2) == 1:
                 if (C1 - H_img[i][j][0]) % 180 < (H_img[i][j][0] - C1) % 180 :
                     H_img[i][j][0] = \
@@ -145,14 +146,14 @@ def auto_palette(palette_rgb, weight): # K x 3 numpy array
     Result = np.zeros((8,3))
     for m in range(0,8):
         Result[m] = brent(palette_hsv,m,weight)
-        #print('F =',Result[m][0],'\talpha =',Result[m][2])
+        print('F =',Result[m][0],'\talpha =',Result[m][2])
     
     Result = Result[np.argsort(Result[:,0])]
-    #print(Result)
+    print(Result)
     m = 0
     print(m)
     M, Alpha = int(Result[m][1]), Result[m][2]
-    sigma_w_ratio = 1/2
+    sigma_w_ratio = 0.25
     palette_hsv = harm_shift(palette_hsv, M, Alpha, sigma_w_ratio)
     palette_rgb = cv2.cvtColor(palette_hsv,cv2.COLOR_HSV2RGB)##back to RGB
     return palette_rgb[0]
