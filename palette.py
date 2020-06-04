@@ -66,7 +66,9 @@ def k_means(bins, k=5, init_mean=True, max_iter=1000, black=True):
 		if (new_means == means).all(): break
 		else: means = new_means
 
-	return np.sort(means[:k],axis=0), cluster_cnt[np.argsort(means[:k],axis=0)]
+	arg_th = np.argsort(means[:k], axis=0)[:,0]
+
+	return means[arg_th], cluster_cnt[arg_th]
 
 
 
