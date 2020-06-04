@@ -94,7 +94,7 @@ class Window(QWidget):
         # transfer to lab
         style_img_lab = rgb2lab(style_img)
         # get palettes
-        colors = style_img_lab.getcolors(style_img_lab.width*style_img_lab.height)
+        colors = style_img_lab.getcolors(style_img.width*style_img.height)
         bins = {}
         for count, pixel in colors:
             bins[pixel] = count
@@ -104,7 +104,7 @@ class Window(QWidget):
         print('style',style_means)
 
         # rbf weights
-        style_sample_weight_map = rbf_weights(style_means, self.sample_colors)
+        # style_sample_weight_map = rbf_weights(style_means, self.sample_colors)
 
         # change GUI palette color
         style_palette = np.zeros(style_means.shape)
@@ -116,8 +116,8 @@ class Window(QWidget):
 
         #transfer
         self.img = img_color_transfer(
-            self.img, self.means, style_means, \
-            style_sample_weight_map, self.sample_colors, self.sample_level)
+            self.img_lab, self.means, style_means, \
+            self.sample_weight_map, self.sample_colors, self.sample_level)
         print('Done')
         resized = toqpixmap(self.img).scaledToHeight(512)
         self.image_label.setPixmap(resized)
