@@ -136,7 +136,7 @@ def harm_shift(H_img, m, alpha, s_w):
 def auto_palette(palette_rgb, weight): # K x 3 numpy array
     k = palette_rgb.shape[0]
     palette_rgb = palette_rgb.reshape(1,k,3)
-    palette_hsv = cv2.cvtColor(palette_rgb, cv2.COLOR_RGB2HSV)
+    palette_hsv = cv2.cvtColor(palette_rgb.astype(np.ubyte), cv2.COLOR_RGB2HSV)
 
     Result = np.zeros((8,3))
     for m in range(0,8):
