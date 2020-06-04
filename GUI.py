@@ -102,12 +102,11 @@ class Window(QWidget):
         style_means, _ = \
             k_means(bins, k=self.K, init_mean=True)
         print('style',style_means)
-        #self.palette_color = self.mean2palette()
-        #self.set_palette_color()
 
         # rbf weights
         style_sample_weight_map = rbf_weights(style_means, self.sample_colors)
 
+        # change GUI palette color
         style_palette = np.zeros(style_means.shape)
         for i in range(0, self.means.shape[0]):
             lab = Image.new('LAB',(1,1),html_color(style_means[i].astype(int)))
@@ -115,6 +114,7 @@ class Window(QWidget):
         self.palette_color = style_palette.astype(int)
         self.set_palette_color()
 
+        #transfer
         self.img = img_color_transfer(
             self.img, self.means, style_means, \
             style_sample_weight_map, self.sample_colors, self.sample_level)
