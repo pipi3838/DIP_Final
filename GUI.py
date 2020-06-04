@@ -82,6 +82,46 @@ class Window(QWidget):
         return pixmap
     def style_transfer(self):
         print('style transfer in development')
+
+        options = QFileDialog.Options()
+        file_name, _ = QFileDialog.getOpenFileName(
+            self,"QFileDialog.getOpenFileName()", "", \
+            "Images (*.jpg *.JPG *jpeg *.png *.webp *.tiff *.tif *.bmp *.dib);;All Files (*)", options=options)
+        if len(file_name) == 0:
+            return
+        # load image
+        style_img = Image.open(file_name)
+        # transfer to lab
+        style_img_lab = rgb2lab(style_img)
+        # get palettes
+        colors = style_img_lab.getcolors(style_img_lab.width*style_img_lab.height)
+        bins = {}
+        for count, pixel in colors:
+            bins[pixel] = count
+        bins = sample_bins(bins)
+        style_means, _ = \
+            k_means(bins, k=self.K, init_mean=True)
+        print('style',style_means)
+        #self.palette_color = self.mean2palette()
+        #self.set_palette_color()
+
+        # rbf weights
+        style_sample_weight_map = rbf_weights(style_means, self.sample_colors)
+
+        style_palette = np.zeros(style_means.shape)
+        for i in range(0, self.means.shape[0]):
+            lab = Image.new('LAB',(1,1),html_color(style_means[i].astype(int)))
+            style_palette[i] = np.array(lab2rgb(lab).getpixel((0,0)))
+        self.palette_color = style_palette.astype(int)
+        self.set_palette_color()
+
+        self.img = img_color_transfer(
+            self.img, self.means, style_means, \
+            style_sample_weight_map, self.sample_colors, self.sample_level)
+        print('Done')
+        resized = toqpixmap(self.img).scaledToHeight(512)
+        self.image_label.setPixmap(resized)
+
     def auto(self):
         print(self.palette_color)
         self.palette_color = \
@@ -152,6 +192,8 @@ class Window(QWidget):
         file_name, _ = QFileDialog.getOpenFileName(
             self,"QFileDialog.getOpenFileName()", "", \
             "Images (*.jpg *.JPG *jpeg *.png *.webp *.tiff *.tif *.bmp *.dib);;All Files (*)", options=options)
+        if len(file_name) == 0:
+            return
         self.Source = file_name
         resized = self.pixmap_open_img(5).scaledToHeight(512)
         self.image_label.setPixmap(resized)
@@ -167,6 +209,8 @@ class Window(QWidget):
         file_name, _ = QFileDialog.getSaveFileName(
             self,"QFileDialog.getOpenFileName()", "", \
             "PNG (*.png);;JPG (*.jpg);;Images (*.jpg *.JPG *jpeg *.png *.webp *.tiff *.tif *.bmp *.dib);;All Files (*)", options=options)
+        if len(file_name) == 0:
+            return
         print('Saving to',file_name)
         if file_name.find('.') == -1:
             file_name += '.png'
