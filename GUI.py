@@ -65,7 +65,10 @@ class Window(QWidget):
         #####self.palette_color = means_rgb[0]
         self.palette_color = self.mean2palette()
         self.set_palette_color()
-        print('auto:', auto_palette(self.palette_color, self.means_weight))
+        print('original palette')
+        print(self.palette_color)
+        #print('auto:') 
+        #print(auto_palette(self.palette_color, self.means_weight))
     def pixmap_open_img(self, k):
         # load image
         self.img = Image.open(self.Source)
@@ -77,6 +80,29 @@ class Window(QWidget):
         pixmap = toqpixmap(self.img)
         #self.set_number_of_palettes('5') # default 5 palettes
         return pixmap
+    def style_transfer(self):
+        print('style transfer in development')
+    def auto(self):
+        print(self.palette_color)
+        self.palette_color = \
+            auto_palette(self.palette_color, self.means_weight)
+        self.set_palette_color()
+        print(self.palette_color)
+        # modify image
+        ####palette_color_lab = cv2.cvtColor(
+        ####    self.palette_color[None,:,:],cv2.COLOR_RGB2Lab)[0]
+        ####print(palette_color_lab)
+        self.img = img_color_transfer(
+            self.img_lab, self.means, self.palette2mean(), \
+            self.sample_weight_map, self.sample_colors, self.sample_level)
+        print('Done')
+        ## for testing
+        #enhancer = ImageEnhance.Brightness(self.img)
+        #self.img = enhancer.enhance(1.1)
+        # show image
+        #self.image_label.setPixmap(pixmap)
+        resized = toqpixmap(self.img).scaledToHeight(512)
+        self.image_label.setPixmap(resized)
     def clicked(self, N):
         if N >= self.K:
             print('invalid palette')
@@ -203,6 +229,17 @@ class Window(QWidget):
         image_button_layout.addWidget(save_image)
         Image_button.setLayout(image_button_layout)
         self.main_layout.addWidget(Image_button)
+        
+        Auto_button = QWidget()
+        auto_button_layout = QHBoxLayout()
+        auto = QPushButton('Auto')
+        style = QPushButton('Style Transfer')
+        auto_button_layout.addWidget(auto)
+        auto_button_layout.addWidget(style)
+        auto.clicked.connect(self.auto)
+        style.clicked.connect(self.style_transfer)
+        Auto_button.setLayout(auto_button_layout)
+        self.main_layout.addWidget(Auto_button)
 
         self.setLayout(self.main_layout)
 
