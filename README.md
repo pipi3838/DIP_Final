@@ -12,7 +12,7 @@ Color Transfer <br>
 ![color transfer result](https://i.imgur.com/aWTsk9d.png)
 
 Color Harmonization <br>
-![](https://i.imgur.com/QkRDyvR.jpg)
+![](https://i.imgur.com/zleOV37.jpg)
 
 Color Style Transfer <br>
 ![](https://i.imgur.com/Tz10dqV.jpg)
